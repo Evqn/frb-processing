@@ -1,0 +1,3 @@
+# freq is assumed to be CF
+vsrdump_char_100 slcp-0001-01.vdr -o slcp-0001-01.cs -name m81r -comp -freq 2250 -bw 100 -robledo -vsr &
+vsrdump_char_100 srcp-0001-01.vdr -o srcp-0001-01.cs -name m81r -comp -freq 2250 -bw 100 -robledo -vsr &

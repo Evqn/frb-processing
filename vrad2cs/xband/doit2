@@ -1,0 +1,11 @@
+# freq is assumed to be CF
+#vsrdump xlcp-0001-01.vdr -o xlcp-0001-01.cs -name m81r -comp -freq 8224 -bw 32 -robledo -vsr &
+#vsrdump xlcp-0001-02.vdr -o xlcp-0001-02.cs -name m81r -comp -freq 8256 -bw 32 -robledo -vsr &
+#vsrdump xlcp-0001-03.vdr -o xlcp-0001-03.cs -name m81r -comp -freq 8288 -bw 32 -robledo -vsr &
+#vsrdump xlcp-0001-04.vdr -o xlcp-0001-04.cs -name m81r -comp -freq 8320 -bw 32 -robledo -vsr &
+
+vsrdump xrcp-0001-01.vdr -o xrcp-0001-01.cs -name m81r -comp -freq 8224 -bw 32 -robledo -vsr &
+vsrdump xrcp-0001-02.vdr -o xrcp-0001-02.cs -name m81r -comp -freq 8256 -bw 32 -robledo -vsr &
+vsrdump xrcp-0001-03.vdr -o xrcp-0001-03.cs -name m81r -comp -freq 8288 -bw 32 -robledo -vsr &
+vsrdump xrcp-0001-04.vdr -o xrcp-0001-04.cs -name m81r -comp -freq 8320 -bw 32 -robledo -vsr &
+

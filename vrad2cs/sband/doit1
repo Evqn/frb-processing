@@ -1,0 +1,2 @@
+./rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/shared/22m295/22-295-001_d63_PSR2_SLCP.vrad slcp-0001-01.vdr &
+./rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/shared/22m295/22-295-001_d63_PSR2_SRCP.vrad srcp-0001-01.vdr &

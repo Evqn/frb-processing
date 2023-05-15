@@ -1,0 +1,25 @@
+ Data file name without suffix          =  slcp-0001_DM219.460
+ Telescope used                         =  Robledo
+ Instrument used                        =  Unknown
+ Object being observed                  =  m81r
+ J2000 Right Ascension (hh:mm:ss.ssss)  =  00:00:00.0000
+ J2000 Declination     (dd:mm:ss.ssss)  =  00:00:00.0000
+ Data observed by                       =  unset
+ Epoch of observation (MJD)             =  59874.780601851969550
+ Barycentered?           (1 yes, 0 no)  =  0
+ Number of bins in the time series      =  913768320  
+ Width of each time series bin (sec)    =  1.024e-05
+ Any breaks in the data? (1 yes, 0 no)  =  0
+ Type of observation (EM band)          =  Radio
+ Beam diameter (arcsec)                 =  471
+ Dispersion measure (cm-3 pc)           =  219.46
+ Central freq of low channel (MHz)      =  2200.04882812
+ Total bandwidth (MHz)                  =  100
+ Number of channels                     =  1024
+ Channel bandwidth (MHz)                =  0.09765625
+ Data analyzed by                       =  majid
+ Any additional notes:
+    Project ID unset, Date: 2022-10-22T18:44:04.00001.
+    2 polns were summed.  Samples have 32 bits.
+
+

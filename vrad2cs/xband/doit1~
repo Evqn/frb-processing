@@ -1,0 +1,11 @@
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-001_d63_PSR2_XLCP.vrad xlcp-0001-01.vdr &
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-002_d63_PSR2_XLCP.vrad xlcp-0001-02.vdr &
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-003_d63_PSR2_XLCP.vrad xlcp-0001-03.vdr &
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-004_d63_PSR2_XLCP.vrad xlcp-0001-04.vdr &
+
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-001_d63_PSR2_XRCP.vrad xrcp-0001-01.vdr &
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-002_d63_PSR2_XRCP.vrad xrcp-0001-02.vdr &
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-003_d63_PSR2_XRCP.vrad xrcp-0001-03.vdr &
+rdef_io -V -f 22/295_18:44:04 -n 60 /net/castor/export/data4/majid/olr/22m295/22-295-004_d63_PSR2_XRCP.vrad xrcp-0001-04.vdr &
+
+

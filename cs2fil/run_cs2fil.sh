@@ -1,0 +1,1 @@
+python3 cs2fil.py --basename slcp --cs_dir /home/evanz/scripts/vrad2cs/cs --dada_dir /home/evanz/scripts/vrad2cs/out --fil_dir /home/evanz/scripts/vrad2cs/out --dm 219.46 --nchan 10
