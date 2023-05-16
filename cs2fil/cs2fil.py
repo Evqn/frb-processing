@@ -333,7 +333,8 @@ def write_dada_header(outfile, fcenter_MHz, bw_MHz, tsamp_us,
 
     # UTC Start Time
     tstart = Time(mjd_start, format='mjd')
-    tstr = str(tstart.datetime64)
+    # tstr = str(tstart.datetime64)
+    tstr = tstart.isot
     utc_str = '-'.join(tstr.split('T'))
     hdr.utc_start = utc_str
     

@@ -262,7 +262,9 @@ def make_plot(filfile, dm, favg=1, tavg=1, spec_sig=5,
     #ts0 = np.mean(dat0, axis=1)
     #ts0 = (ts0-avg)/sig
     #ax_t.plot(tt0, ts0, c='0.5', zorder=-1)
-
+    print(np.max(ts))
+    print(np.mean(ts[492:508]))
+    print(np.mean(np.append(ts[0:492],ts[509:])))
     ax_t.plot(tt, ts)
     ax_t.tick_params(axis='x', labelbottom=False)
     tylim = ax_t.get_ylim()

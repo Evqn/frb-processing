@@ -8,6 +8,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from astropy.time import Time, TimeDelta
 import sigproc as fb
+import multiprocessing as mp
+import re
 
 srcdir = '/home/evanz/scripts/vrad2cs'
 
@@ -85,14 +87,16 @@ def vrad_2_vdr(pulse_times, vrad_file, out_dir, data_amount, srcdir=srcdir):
     # Create directory to put vdr files in 
     vdr_dir = "%s/vdr" % (out_dir)
     if not os.path.exists(vdr_dir):
-        os.mkdir(vdr_dir)
+        os.makedirs(vdr_dir, exist_ok=True)
 
     for i, t in enumerate(pulse_times):
         # replace with vdr suffix to create output path + place in vdr folder
         basename = os.path.basename(vrad_file)
         basename = os.path.splitext(basename)[0]
 
-        out_file = "%s/%s_p%i.vdr" % (vdr_dir, basename, i)
+        # zero pad pulse_str
+        pulse_str = str(i).zfill(4)
+        out_file = "%s/%s_p%s.vdr" % (vdr_dir, basename, pulse_str)
 
 
         # wait for process to finish before executing another
@@ -121,7 +125,7 @@ def vdr_2_cs(vdr_file, out_dir, freq_band, source_name, freq, bw,
     # Create directory to put cs files in 
     cs_dir = "%s/cs" % (out_dir)
     if not os.path.exists(cs_dir):
-        os.mkdir(cs_dir)
+        os.makedirs(cs_dir, exist_ok=True)
 
     # replace with cs suffix to create output path + place in cs folder
     basename = os.path.basename(vdr_file)
@@ -144,13 +148,14 @@ def vdr_2_cs(vdr_file, out_dir, freq_band, source_name, freq, bw,
         print(cmd)
         subprocess.run(cmd, shell=True)
 
-def calculate_offsets(mjd_start, times_after_start, cs_files):
+def calculate_offsets(mjd_start, times_after_start, cs_files, out_dir):
     """
-    Calculates offset time for each burst
+    Calculates offset time for each burst.
+    Writes offset to txt file for burst plotting
     
     delta_t = t_sp - t_cs
     """
-    offsets = []
+    offsets = [0 for _ in range(len(cs_files))]
 
     for i, time in enumerate(times_after_start):
 
@@ -166,8 +171,19 @@ def calculate_offsets(mjd_start, times_after_start, cs_files):
         # subtract and return value in seconds
         off_set = t_sp-t_cs
         off_set = off_set.to_value('s')
-        offsets.append(off_set)
+
+        # Use regex to find the pattern. We are looking for p followed by 4 digits
+        match = re.search(r'p(\d{4})', cs_files[i])
+        index = -1
+        if match:
+            # Convert the digit part to an integer
+            index = int(match.group(1))
+        else:
+            print("Pattern not found in filename.")
+        offsets[index] = off_set
+    offsets = pd.Series(offsets, name="Offset Times")
     print(offsets)
+    offsets.to_csv('%soffset_times.txt' % out_dir)
     return offsets
 
 
@@ -237,9 +253,13 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     # Take each vrad file and convert to vdr
     print("\n\nvrad -> vdr...")
     vrad_infiles = glob.glob("%s/%s*.vrad" % (vrad_dir, vrad_base))
-    for vrad_file in vrad_infiles:
-        vrad_2_vdr(converted_times, vrad_file, out_dir, 
-                   data_amount, srcdir=srcdir)
+
+    with mp.Pool() as pool:
+        # Create a list of arguments for each call to vrad_2_vdr
+        args_list = [(converted_times, vrad_file, out_dir, data_amount, srcdir) for vrad_file in vrad_infiles]
+
+        # Use the pool to map the vrad_2_vdr function to the args_list
+        pool.starmap(vrad_2_vdr, args_list)
 
     # Take vdr files and convert to cs
     print("\n\nvdr -> cs...")
@@ -250,9 +270,11 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     if freq_band == "s":
         s_freq = freq_dct[freq_band]
         s_bw   = bw_dct[freq_band]
-        for vdr_file in vdr_infiles:
-            vdr_2_cs(vdr_file, out_dir, freq_band, source, s_freq, s_bw, 
-                     telescope, srcdir=srcdir)
+        with mp.Pool() as pool:
+            # Create a list of arguments for each call to vdr_2_cs
+            args_list = [(vdr_file, out_dir, freq_band, source, s_freq, s_bw, telescope, srcdir) for vdr_file in vdr_infiles]
+            # Use the pool to map the vdr_2_cs function to the args_list
+            pool.starmap(vdr_2_cs, args_list)
 
     # we have four different subbands for x band
     elif freq_band == "x":
@@ -261,8 +283,13 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
             subband = "x" + str(i//(len(vdr_infiles)//4)+1)
             x_freq_sb = freq_dct[subband]
             x_bw_sb = bw_dct[freq_band]
-            vdr_2_cs(vdr_file, out_dir, freq_band, source, x_freq_sb, x_bw_sb, 
-                     telescope, srcdir=srcdir)
+            with mp.Pool() as pool:
+
+                # Create a list of arguments for each call to vdr_2_cs
+                args_list = [(vdr_file, out_dir, freq_band, source, x_freq_sb, x_bw_sb, telescope, srcdir) for vdr_file in vdr_infiles]
+
+                # Use the pool to map the vdr_2_cs function to the args_list
+                pool.starmap(vdr_2_cs, args_list)
 
     else:
         print("freq_band must be s or x")
@@ -271,7 +298,7 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     cs_infiles = sorted(glob.glob("%s/cs/*" % (out_dir)))
     print(times_after_start)
     print(cs_infiles)
-    calculate_offsets(mjd_start, times_after_start, cs_infiles)
+    calculate_offsets(mjd_start, times_after_start, cs_infiles, out_dir)
 
     return 
 

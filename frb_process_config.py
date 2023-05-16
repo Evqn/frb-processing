@@ -26,6 +26,18 @@ cs_dir = "cs/"
 dada_dir = "dada/"
 fil_dir = "fil/"
 dm = 219.46
-nchans = [10, 20]
+nchans = [100]
+
+# inputs for plotfil
+offset_file = "offset_times.txt"
+png_dir = "png/"
+tavg = 100
+tdur = 0.2
+
+# Conversions to run
+vrad_to_cs = True
+cs_to_fil = True
+plot_fil = True
+
 
 
