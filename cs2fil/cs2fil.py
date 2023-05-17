@@ -7,6 +7,7 @@ import astropy.units as u
 from astropy.time import Time
 import sigproc as fb
 import click
+import multiprocessing as mp
 
 #########################
 ##  DADA HEADER CLASS  ##
@@ -753,11 +754,11 @@ def cs2fil_multi(basename, cs_dir, dada_dir, fil_dir, dm, nchan,
         return 0
     else: pass
 
-    for cbase in chunk_bases:
-        print("Processing %s..." %cbase)
-        cs2fil_multipass(cbase, cs_dir, dada_dir, fil_dir, dm, nchan, 
-                         mem_lim_gb=mem_lim, nthread=nthread, 
-                         inc_ddm=inc_ddm)
+    with mp.Pool() as pool:
+        # Create a list of arguments for each call to cs2fil_multipass
+        args_list = [(cbase, cs_dir, dada_dir, fil_dir, dm, nchan, mem_lim, nthread, inc_ddm) for cbase in chunk_bases]
+        # Use the pool to map the cs2fil_multipass function to the args_list
+        pool.starmap(cs2fil_multipass, args_list)
     
     return
 

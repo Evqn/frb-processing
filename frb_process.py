@@ -62,6 +62,21 @@ def plot_fil():
     print(cmd)
     subprocess.run(cmd, shell=True)
 
+def dm_opt():
+    """
+    Optimizes dm
+    """
+    print("---------------------------------------------")
+    print("Finding optimal dm value")
+    print("---------------------------------------------")
+    params = {"out_dir": par.outdir, "dm_dir": par.dm_dir, "fil_file": par.fil_file, "offset": par.offset_file,
+        "dm_lo": par.dm_lo, "dm_hi": par.dm_hi, "dm_step": par.dm_step}
+    
+    cmd = "python3 dm_opt/dm_opt.py --out_dir %(out_dir)s --dm_dir %(dm_dir)s --fil_file %(fil_file)s --offsets %(offset)s --dm_lo %(dm_lo)f \
+            --dm_hi %(dm_hi)f --dm_step %(dm_step)f" % params
+    print(cmd)
+    subprocess.run(cmd, shell=True)
+
 
 
 debug = 0
@@ -81,6 +96,15 @@ if __name__ == "__main__":
             st = time.time()
             plot_fil()
             times.append(["fil->plot", round(time.time()-st, 2)])
+        if par.dm_opt:
+            st = time.time()
+            dm_opt()
+            times.append(["dm optimize", round(time.time()-st, 2)])
+
         total = sum(item[1] for item in times)
         times.append(["total", total])
         print(tabulate(times, headers =['Step','Time (s)'],tablefmt = 'fancy_grid'))
+
+
+
+
