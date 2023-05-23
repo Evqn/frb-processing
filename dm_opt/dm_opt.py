@@ -5,6 +5,9 @@ import multiprocessing as mp
 import pandas as pd
 import os
 import re
+import matplotlib.pyplot as plt
+import glob
+
 
 def read_offset(fil_file, offset_file):
     """
@@ -12,6 +15,7 @@ def read_offset(fil_file, offset_file):
     """
     df = pd.read_csv(offset_file)
     offsets = df["Offset Times"]
+    bin_widths = df["Bin Width"]
         # Get corresponding offset value by checking which pulse num
     filename = os.path.basename(fil_file)
 
@@ -24,7 +28,8 @@ def read_offset(fil_file, offset_file):
     else:
         print("Pattern not found in filename.")
     offset = offsets[index]
-    return offset
+    bin_width = bin_widths[index]
+    return offset, bin_width
 
 
 def calc_snr(fil_file, dm, pulse_bins, tp, tdur, bin_width = 1.024*10**(-5), sample_time = 10**(-6), n_bins=5):
@@ -57,7 +62,7 @@ def calc_snr(fil_file, dm, pulse_bins, tp, tdur, bin_width = 1.024*10**(-5), sam
 
 def write_dms(out_dir, dm_dir, basename, dms):
     """
-    Write results to out file
+    Write results to out file and generates png
     """
     df = pd.DataFrame(dms, columns = ['SNR', 'DM'])
     # reorder columns to put DM first
@@ -65,6 +70,13 @@ def write_dms(out_dir, dm_dir, basename, dms):
     df = df[['DM', 'SNR']]
     df.to_csv('%s%s%s.dm' % (out_dir, dm_dir, basename), index=False, sep='\t')
 
+    # create graph
+    df = df.sort_values('DM')
+    plt.figure()
+    plt.plot(df.iloc[:, 0], df.iloc[:, 1]) 
+    plt.xlabel('DM') 
+    plt.ylabel('SNR') 
+    plt.savefig("%s%s%s.png" % (out_dir, dm_dir, basename))
 
 
 
@@ -74,8 +86,8 @@ def write_dms(out_dir, dm_dir, basename, dms):
               help="Path to out dir", required=True)
 @click.option("--dm_dir", type=str,
               help="Path to dm dir", required=True)
-@click.option("--fil_file", type=str, 
-              help="Path to filterbank file", required=True)
+@click.option("--fil_dir", type=str, 
+              help="Path to filterbank dir", required=True)
 @click.option("--offsets", type=str,
               help="Path to offsets file", required=True)
 @click.option("--dm_lo", type=float, 
@@ -85,27 +97,30 @@ def write_dms(out_dir, dm_dir, basename, dms):
 @click.option("--dm_step", type=float, 
               help="Step value of dm", required=True)
 
-def dm_opt(out_dir, dm_dir, fil_file, offsets, dm_lo, dm_hi, dm_step):
+def dm_opt(out_dir, dm_dir, fil_dir, offsets, dm_lo, dm_hi, dm_step):
     """
     Optimizes dm by finding maximum SNR
     """
-    offset = read_offset(fil_file, out_dir+offsets)
-    print(offset)
-    inputs = [(fil_file, round(dm, 2), 150, round(offset, 2), 0.2) for dm in np.arange(dm_lo, dm_hi, dm_step)]
+    fil_files = glob.glob("%s%s*.fil" % (out_dir, fil_dir))
+    print(fil_files)
+    for fil_file in fil_files:
+        offset, bin_width = read_offset(fil_file, out_dir+offsets)
+        print(offset, bin_width)
+        inputs = [(fil_file, round(dm, 2), bin_width, round(offset, 2), 0.2) for dm in np.arange(dm_lo, dm_hi, dm_step)]
 
 
-    with mp.Pool() as pool:
-        results = pool.starmap(calc_snr, inputs)
+        with mp.Pool() as pool:
+            results = pool.starmap(calc_snr, inputs)
 
-    max_snr, max_dm = max(results)
-    print("Maximum SNR: %f at DM: %f" %(max_snr, max_dm))
-    
-    base_name = os.path.basename(fil_file)
-    # Get the file name without the extension.
-    base_name= os.path.splitext(base_name)[0]
+        max_snr, max_dm = max(results)
+        print("Maximum SNR: %f at DM: %f" %(max_snr, max_dm))
+        
+        base_name = os.path.basename(fil_file)
+        # Get the file name without the extension.
+        base_name= os.path.splitext(base_name)[0]
 
-    # write in sorted out
-    write_dms(out_dir, dm_dir, base_name, sorted(results, reverse=True))
+        # write in sorted out
+        write_dms(out_dir, dm_dir, base_name, sorted(results, reverse=True))
 
 
 

@@ -513,7 +513,7 @@ def cs2dada_multipass(basename, indir, outdir, nchannels, mem_lim_gb=32.0):
     Nt_total = int( dsize / (2 * nbits / 8) )
     
     # Write data as (nspec, nchan) shape 
-    dada_out = "%s/%s_n%d.dada" %(outdir, basename, nchannels)
+    dada_out = "%s/%s_n%s.dada" %(outdir, basename, str(nchannels).zfill(4))
 
     # Write header
     hdr = write_dada_header(dada_out, fcenter_MHz, full_bw_MHz, 
@@ -682,8 +682,8 @@ def cs2fil_multipass(basename, cs_dir, dada_dir, fil_dir, dm, nchan,
     t1 = time.time()
 
     # Run digifil 
-    dada_file = "%s/%s_n%d.dada" %(dada_dir, basename, nchan)
-    fil_file = "%s/%s_n%d.fil" %(fil_dir, basename, nchan)
+    dada_file = "%s/%s_n%s.dada" %(dada_dir, basename, str(nchan).zfill(4))
+    fil_file = "%s/%s_n%s.fil" %(fil_dir, basename, str(nchan).zfill(4))
     run_digifil(dada_file, fil_file, dm, nchan, nthread=nthread, inc_ddm=inc_ddm)
     t2 = time.time()
 
@@ -747,6 +747,7 @@ def cs2fil_multi(basename, cs_dir, dada_dir, fil_dir, dm, nchan,
     """
     # First get a list of unique {basename}-XXXX values
     chunk_bases = get_chunk_base(basename, cs_dir)
+    print(chunk_bases)
 
     # Make sure we actually have some files
     if len(chunk_bases) == 0:

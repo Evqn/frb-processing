@@ -38,8 +38,9 @@ def generate_plots(offsets, file, png_dir, dm, tavg, tdur):
 
     basename = os.path.splitext(filename)[0]
     # plot using sp_spec
-    sp.make_plot('%s' % file, dm, tavg=int(307), tp=None, 
-                    tdur=None, outbins=500, outfile="%s%s.png" % (png_dir, basename))
+    sp.make_plot('%s' % file, dm, tavg=int(tavg), tp=offset, 
+                    tdur=tdur, outbins=1024, outfile="%s%s.png" % (png_dir, basename))
+    
 
 
 @click.command()

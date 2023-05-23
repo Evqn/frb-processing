@@ -43,15 +43,17 @@ def extract_start_time(inf_file):
 def extract_pulses(sp_file):
     """
     Takes text file of pulses and returns list of time during which pulses occured.
+    Also return the binwidth of pulse
 
     spfile: single pulse file
     start_time: start time of data file
     """
     pulse_column = 2
+    bin_width_column = 4
 
     df = pd.read_csv(sp_file, sep=" ")
-    times_after_start = df.iloc[:, pulse_column]
-    return times_after_start
+    times_after_start, bin_widths = df.iloc[:, pulse_column], df.iloc[:, bin_width_column]
+    return times_after_start, bin_widths
 
 def convert_times(times_after_start, start_time, record_time):
     """
@@ -96,6 +98,7 @@ def vrad_2_vdr(pulse_times, vrad_file, out_dir, data_amount, srcdir=srcdir):
 
         # zero pad pulse_str
         pulse_str = str(i).zfill(4)
+
         out_file = "%s/%s_p%s.vdr" % (vdr_dir, basename, pulse_str)
 
 
@@ -114,7 +117,7 @@ def vrad_2_vdr(pulse_times, vrad_file, out_dir, data_amount, srcdir=srcdir):
 
 
 def vdr_2_cs(vdr_file, out_dir, freq_band, source_name, freq, bw, 
-             telescope, srcdir=srcdir):
+             telescope, srcdir=srcdir, band_num=1):
     """
     Converts *.vdr files to *.cs files
     Executes script in format:
@@ -130,12 +133,22 @@ def vdr_2_cs(vdr_file, out_dir, freq_band, source_name, freq, bw,
     # replace with cs suffix to create output path + place in cs folder
     basename = os.path.basename(vdr_file)
     basename = os.path.splitext(basename)[0]
-    out_file = "%s/cs/%s-0001-01.cs" % (out_dir, basename)
+
+    # outfile naming convention will be xlcp_p0000-0001-01.cs
+    pulse_num = re.search(r'p(\d{4})', vdr_file).group(0)
+    polarization = ""
+    if "rcp" in vdr_file.lower():
+        polarization = "rcp"
+    if "lcp" in vdr_file.lower():
+        polarization = "lcp"
+
+    out_file = "%s/cs/%s%s-%s-0%s.cs" % (out_dir, freq_band, polarization, pulse_num, band_num)
 
     if freq_band == "s":
-        vsrdump_loc = "%s/vsrdump_char_100" %srcdir
+        vsrdump_loc = "%s/vsrdump_char_100" % srcdir
     else: 
-        vsrdump_loc = "%s/vsrdump_char" %srcdir 
+        vsrdump_loc = "%s/vsrdump_char" % srcdir
+
     cmd = "%s %s -o %s -name %s -comp -freq %.2f -bw %.2f -%s -vsr" \
         % (vsrdump_loc, vdr_file, out_file, source_name, 
            freq, bw, telescope)
@@ -145,17 +158,16 @@ def vdr_2_cs(vdr_file, out_dir, freq_band, source_name, freq, bw,
         os.remove(out_file)
         # print("File: %s already exists" %out_file)
     else:
-        print(cmd)
         subprocess.run(cmd, shell=True)
 
-def calculate_offsets(mjd_start, times_after_start, cs_files, out_dir):
+def calculate_offsets(mjd_start, times_after_start, bin_widths, cs_files, out_dir, freq_band, freq_low, freq_high, dm):
     """
     Calculates offset time for each burst.
     Writes offset to txt file for burst plotting
     
     delta_t = t_sp - t_cs
     """
-    offsets = [0 for _ in range(len(cs_files))]
+    offsets = [0 for _ in range(len(times_after_start))]
 
     for i, time in enumerate(times_after_start):
 
@@ -180,13 +192,23 @@ def calculate_offsets(mjd_start, times_after_start, cs_files, out_dir):
             index = int(match.group(1))
         else:
             print("Pattern not found in filename.")
+        
+        # dispersive delay
+        # t_dm = 4.15 * 10^6 ms * (freq_lo^-2 – freq_hi^-2) * DM
+        if freq_band == "x":
+            DM_CONSTANT = 4.15*(10**6)
+
+            t_dm = DM_CONSTANT * (freq_low**(-2)-freq_high**(-2)) * dm
+
+            # subtract from offset
+            off_set -= t_dm/1000
+
         offsets[index] = off_set
     offsets = pd.Series(offsets, name="Offset Times")
-    print(offsets)
-    offsets.to_csv('%soffset_times.txt' % out_dir)
+    df = offsets.to_frame()
+    df['Bin Width'] = bin_widths
+    df.to_csv('%soffset_times.txt' % out_dir)
     return offsets
-
-
 
 @click.command()
 @click.option("--inf_file", type=str, 
@@ -201,6 +223,8 @@ def calculate_offsets(mjd_start, times_after_start, cs_files, out_dir):
               help="Output directory of *.cs and intermediate *.vdr files", required=True)
 @click.option("--freq_band", type=str,
               help="Frequency band to process (s/x)", required=True)
+@click.option("--dm", type=float,
+              help="Dispersion Measure", required = True)
 @click.option("--source", type=str,
               help="Name of the pulse source", required=True)
 @click.option("--telescope", type=str,
@@ -208,7 +232,7 @@ def calculate_offsets(mjd_start, times_after_start, cs_files, out_dir):
 @click.option("--data_amount", type=float,
               help="Amount of data to write (in seconds)", required=True)
 def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir, 
-              freq_band, source, telescope, data_amount, srcdir=srcdir):
+              freq_band, dm, source, telescope, data_amount, srcdir=srcdir):
     """
     ***EXAMPLE CALL***
     python3 vrad2cs.py --inf_file /home/evanz/scripts/22m295/data/slcp-0001_DM219.460.inf --sp_file /home/evanz/scripts/22m295/sband/sp_list_merged.singlepulse --vrad_dir /home/evanz/scripts/22m295/data --vrad_base data1 --out_dir /home/evanz/scripts/22m295/data/ --freq_band s --source m81 --telescope robledo --data_amount 1
@@ -243,7 +267,7 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     # Extract starting time from .inf file
     mjd_start, start_time = extract_start_time(inf_file)
     
-    times_after_start = extract_pulses(sp_file)
+    times_after_start, bin_widths = extract_pulses(sp_file)
 
 
     # Add list of times to start time
@@ -253,6 +277,7 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     # Take each vrad file and convert to vdr
     print("\n\nvrad -> vdr...")
     vrad_infiles = glob.glob("%s/%s*.vrad" % (vrad_dir, vrad_base))
+    print(vrad_infiles)
 
     with mp.Pool() as pool:
         # Create a list of arguments for each call to vrad_2_vdr
@@ -278,18 +303,24 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
 
     # we have four different subbands for x band
     elif freq_band == "x":
-        for i, vdr_file in enumerate(sorted(vdr_infiles)):
-            # subband changes
-            subband = "x" + str(i//(len(vdr_infiles)//4)+1)
+        band_info = []
+        for vdr_file in vdr_infiles:
+            band_num = re.search(r'-00(\d+)', vdr_file).group(1)
+            subband = "x" + str(band_num)
             x_freq_sb = freq_dct[subband]
             x_bw_sb = bw_dct[freq_band]
-            with mp.Pool() as pool:
+            # associate each file with freq and bw for its value (1, 2, 3, 4)
+            band_info.append((vdr_file, x_freq_sb, x_bw_sb, band_num))
 
-                # Create a list of arguments for each call to vdr_2_cs
-                args_list = [(vdr_file, out_dir, freq_band, source, x_freq_sb, x_bw_sb, telescope, srcdir) for vdr_file in vdr_infiles]
+        with mp.Pool() as pool:
 
-                # Use the pool to map the vdr_2_cs function to the args_list
-                pool.starmap(vdr_2_cs, args_list)
+            # Create a list of arguments for each call to vdr_2_cs
+            args_list = [(vdr_file, out_dir, freq_band, source, 
+                          x_freq_sb, x_bw_sb, telescope, srcdir, band_num) 
+                         for vdr_file, x_freq_sb, x_bw_sb, band_num in band_info]
+
+            # Use the pool to map the vdr_2_cs function to the args_list
+            pool.starmap(vdr_2_cs, args_list)
 
     else:
         print("freq_band must be s or x")
@@ -298,7 +329,23 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     cs_infiles = sorted(glob.glob("%s/cs/*" % (out_dir)))
     print(times_after_start)
     print(cs_infiles)
-    calculate_offsets(mjd_start, times_after_start, cs_infiles, out_dir)
+    if freq_band == "x":
+        # take subset of cs_infiles for each pulse
+        # not the most efficient way of doing it
+        subset = []
+        for i in range(len(times_after_start)):
+            for file in cs_infiles:
+                if int(re.search(r'p(\d{4})', file).group(1)) == i:
+                    subset.append(file)
+                    break
+        cs_infiles = subset
+    print(cs_infiles)
+
+    freq_low = freq_dct["s"]
+    # take highest frequency x-band
+    freq_high = freq_dct[sorted(list(freq_dct.keys()), reverse=True)[0]]
+
+    calculate_offsets(mjd_start, times_after_start, bin_widths, cs_infiles, out_dir, freq_band, freq_low, freq_high, dm)
 
     return 
 

@@ -2,6 +2,10 @@ import frb_process_config as par
 import subprocess
 import time
 from tabulate import tabulate
+import os
+import shutil
+import glob
+
 """
 Runs entire pipeline from vrad -> filterbank
 """
@@ -17,11 +21,11 @@ def vrad_2_cs():
     params = {"in": par.indir, "inf": par.inf_file, "sp": par.sp_file, "vrad_dir": par.vrad_dir,
               "vrad_base": par.vrad_base, "out": par.outdir, 
               "freq": par.freq_band, "source": par.source, \
-              "tele": par.telescope, "amount": par.data_amount}
+              "tele": par.telescope, "amount": par.data_amount, "dm": par.dm}
     
-    cmd = "python3 vrad2cs/vrad2cs.py --inf_file %(in)s%(inf)s --sp_file %(in)s%(sp)s" \
+    cmd = "python3 -u vrad2cs/vrad2cs.py --inf_file %(in)s%(inf)s --sp_file %(in)s%(sp)s" \
            " --vrad_dir %(in)s%(vrad_dir)s --vrad_base %(vrad_base)s --out_dir %(out)s" \
-           " --freq_band %(freq)s --source %(source)s --telescope %(tele)s --data_amount %(amount)i" % params
+           " --freq_band %(freq)s --dm %(dm)s --source %(source)s --telescope %(tele)s --data_amount %(amount)i" % params
     
     print(cmd)
     subprocess.run(cmd, shell=True)
@@ -40,7 +44,7 @@ def cs_2_fil():
     
     for num in par.nchans:    
         params["num"] = num
-        cmd = "python3 cs2fil/cs2fil.py --basename %(base)s --cs_dir %(out)s%(cs_dir)s \
+        cmd = "python3 -u cs2fil/cs2fil.py --basename %(base)s --cs_dir %(out)s%(cs_dir)s \
               --dada_dir %(out)s%(dada_dir)s \
               --fil_dir %(out)s%(fil_dir)s --dm %(dm)f --nchan %(num)i" % params
         
@@ -57,7 +61,7 @@ def plot_fil():
     params = {"out": par.outdir, "offset": par.offset_file,
         "fil_dir": par.fil_dir, "png_dir": par.png_dir, "dm": par.dm, "tavg": par.tavg, "tdur": par.tdur}
     
-    cmd = "python3 plotfil/plotfil.py --off_file %(out)s%(offset)s --fil_dir %(out)s%(fil_dir)s \
+    cmd = "python3 -u plotfil/plotfil.py --off_file %(out)s%(offset)s --fil_dir %(out)s%(fil_dir)s \
             --png_dir %(out)s%(png_dir)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
     print(cmd)
     subprocess.run(cmd, shell=True)
@@ -69,10 +73,10 @@ def dm_opt():
     print("---------------------------------------------")
     print("Finding optimal dm value")
     print("---------------------------------------------")
-    params = {"out_dir": par.outdir, "dm_dir": par.dm_dir, "fil_file": par.fil_file, "offset": par.offset_file,
+    params = {"out_dir": par.outdir, "dm_dir": par.dm_dir, "fil_dir": par.fil_dir, "offset": par.offset_file,
         "dm_lo": par.dm_lo, "dm_hi": par.dm_hi, "dm_step": par.dm_step}
     
-    cmd = "python3 dm_opt/dm_opt.py --out_dir %(out_dir)s --dm_dir %(dm_dir)s --fil_file %(fil_file)s --offsets %(offset)s --dm_lo %(dm_lo)f \
+    cmd = "python3 -u dm_opt/dm_opt.py --out_dir %(out_dir)s --dm_dir %(dm_dir)s --fil_dir %(fil_dir)s --offsets %(offset)s --dm_lo %(dm_lo)f \
             --dm_hi %(dm_hi)f --dm_step %(dm_step)f" % params
     print(cmd)
     subprocess.run(cmd, shell=True)
@@ -100,11 +104,22 @@ if __name__ == "__main__":
             st = time.time()
             dm_opt()
             times.append(["dm optimize", round(time.time()-st, 2)])
-
         total = sum(item[1] for item in times)
         times.append(["total", total])
         print(tabulate(times, headers =['Step','Time (s)'],tablefmt = 'fancy_grid'))
-
+        
+        # clean up dada and vdr files
+        if par.cleanup:
+            dada_path = "%s%s" % (par.outdir, par.dada_dir)
+            if os.path.exists(dada_path):
+                files = glob.glob(dada_path + '/*')
+                for file in files:
+                    os.remove(file)
+            vdr_path = "%s%s" % (par.outdir, par.vdr_dir)
+            if os.path.exists(vdr_path):
+                files = glob.glob(vdr_path + "/*")
+                for file in files:
+                    os.remove(file)
 
 
 
