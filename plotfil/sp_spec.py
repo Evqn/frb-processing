@@ -203,7 +203,7 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     return tt_out, ff_out, dout
 
 
-def make_plot(filfile, dm, favg=1, tavg=1, spec_sig=5, 
+def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,  
               outbins=128, tp=None, tdur=None, 
               outfile=None, cnum=None,
               ctime=None, cdm=None, cwidth=None):
@@ -308,6 +308,8 @@ def make_plot(filfile, dm, favg=1, tavg=1, spec_sig=5,
     ax_txt.text(0.00, 0.8, outstr, fontsize=12, ha='left', va='top', 
                 transform=ax_txt.transAxes)
     
+    # Add pulse num and snr text
+    fig.text(0.75, 0.95, f'Pulse: {pulse_num}\nSNR: {snr}', fontsize=12, ha='left', va='top')
 
     if outfile is not None:
         plt.savefig(outfile, dpi=100, bbox_inches='tight')

@@ -1,7 +1,5 @@
 """
 Parameter file for frb_process.py
-
-All output directories are assumed to be in the outdir
 """
 
 
@@ -9,26 +7,26 @@ All output directories are assumed to be in the outdir
 indir = "/src/in/"
 
 # Output directory
-outdir = "/out/22m295/"
+outdir = "/out/23m041/"
 
 # Inputs for vrad2cs conversion
-inf_file = "slcp-0001_DM219.460.inf"
+inf_file = "scan.table.23m041"
 sp_file = "one.singlepulse"
 vrad_dir = "vrad/"
-vrad_base = "22-295-001_d63_PSR2_S" # set last char to X or S
+vrad_base = "23" # set last char to X or S
 
-freq_band = "s" # set to x or s 
-source = "m81" 
+freq_band = "x" # set to x or s 
+source = "j1810" 
 telescope = "robledo" 
 data_amount = 3
 
 # Inputs for cs2fil conversion
-cs_base = "s" # set to x or s
+cs_base = "x" # set to x or s
 cs_dir = "cs/"
 dada_dir = "dada/"
 fil_dir = "fil/"
-dm = 219.46
-nchans = [100]
+dm = 178.85
+nchans = [8]
 
 # inputs for plotfil
 offset_file = "offset_times.txt"

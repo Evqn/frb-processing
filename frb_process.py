@@ -1,4 +1,5 @@
-import frb_process_config as par
+# import frb_process_config as par
+import frb_process_config_23m041 as par
 import subprocess
 import time
 from tabulate import tabulate
@@ -25,7 +26,7 @@ def vrad_2_cs():
     
     cmd = "python3 -u vrad2cs/vrad2cs.py --inf_file %(in)s%(inf)s --sp_file %(in)s%(sp)s" \
            " --vrad_dir %(in)s%(vrad_dir)s --vrad_base %(vrad_base)s --out_dir %(out)s" \
-           " --freq_band %(freq)s --dm %(dm)s --source %(source)s --telescope %(tele)s --data_amount %(amount)i" % params
+           " --freq_band %(freq)s --dm %(dm)f --source %(source)s --telescope %(tele)s --data_amount %(amount)i" % params
     
     print(cmd)
     subprocess.run(cmd, shell=True)
@@ -58,11 +59,11 @@ def plot_fil():
     print("---------------------------------------------")
     print("Converting from fil to plot")
     print("---------------------------------------------")
-    params = {"out": par.outdir, "offset": par.offset_file,
-        "fil_dir": par.fil_dir, "png_dir": par.png_dir, "dm": par.dm, "tavg": par.tavg, "tdur": par.tdur}
+    params = {"out": par.outdir, "offset": par.offset_file, "freq_band": par.freq_band,
+        "fil_dir": par.fil_dir, "png_dir": par.png_dir, "npy_dir": par.npy_dir, "dm": par.dm, "tavg": par.tavg, "tdur": par.tdur}
     
     cmd = "python3 -u plotfil/plotfil.py --off_file %(out)s%(offset)s --fil_dir %(out)s%(fil_dir)s \
-            --png_dir %(out)s%(png_dir)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
+            --png_dir %(out)s%(png_dir)s --npy_dir %(out)s%(npy_dir)s --freq_band %(freq_band)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
     print(cmd)
     subprocess.run(cmd, shell=True)
 

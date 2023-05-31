@@ -15,29 +15,54 @@ srcdir = '/home/evanz/scripts/vrad2cs'
 
 def extract_start_time(inf_file):
     """
-    Given inf_file, find MJD time and return it in YY/Day_HH:MM:SS format
+    Given inf_file/scan_table, find MJD time and return it in YY/Day_HH:MM:SS format
     """
-    epoch_key = "Epoch of observation (MJD)"
-    mjd = None
+    if "scan.table" in inf_file:
+        # Define the output format
+        output_format = "%y/%j_%H:%M:%S"
+        # Open the scan table file
+        with open(inf_file, 'r') as file:
 
-    with open(inf_file, 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if epoch_key in line:
-                _, value = line.split('=', 1)
-                mjd = value.strip()
-                break
+            line = file.readline().rstrip()
 
-    t = Time(mjd, scale='utc', format='mjd')
+            # Split the line into parts
+            parts = line.split()
 
-    # convert to required format
-    input_format = "%Y:%j:%H:%M:%S.%f"
-    dt = datetime.strptime(t.yday, input_format)
+            # Extract the date and time parts
+            date = parts[3] # could be different
+            time = parts[4] + parts[5] + parts[6] # could be different
 
-    # Format the datetime object using strftime
-    output_format = "%y/%j_%H:%M:%S"
-    formatted_time = dt.strftime(output_format)
-    return t, formatted_time
+            date_time_str = date + time.replace(' ', '')
+            print(date_time_str)
+            date_time_obj = datetime.strptime(date_time_str, '%y%m%d%H%M%S')
+            output = date_time_obj.strftime(output_format)
+            print(Time(date_time_obj).yday)
+            return Time(date_time_obj), output
+    else:
+        epoch_key = "Epoch of observation (MJD)"
+        mjd = None
+
+        with open(inf_file, 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                if epoch_key in line:
+                    _, value = line.split('=', 1)
+                    mjd = value.strip()
+                    break
+
+        t = Time(mjd, scale='utc', format='mjd')
+        print(t.yday)
+
+        # convert to required format
+        input_format = "%Y:%j:%H:%M:%S.%f"
+        dt = datetime.strptime(t.yday, input_format)
+
+        # Format the datetime object using strftime
+        output_format = "%y/%j_%H:%M:%S"
+        formatted_time = dt.strftime(output_format)
+        return t, formatted_time
+
+
 
 
 def extract_pulses(sp_file):
@@ -50,10 +75,11 @@ def extract_pulses(sp_file):
     """
     pulse_column = 2
     bin_width_column = 4
+    snr_column = 1
 
-    df = pd.read_csv(sp_file, sep=" ")
-    times_after_start, bin_widths = df.iloc[:, pulse_column], df.iloc[:, bin_width_column]
-    return times_after_start, bin_widths
+    df = pd.read_csv(sp_file, sep="\s+")
+    times_after_start, bin_widths, snrs = df.iloc[:, pulse_column], df.iloc[:, bin_width_column], df.iloc[:, snr_column]
+    return times_after_start, bin_widths, snrs
 
 def convert_times(times_after_start, start_time, record_time):
     """
@@ -73,6 +99,7 @@ def convert_times(times_after_start, start_time, record_time):
         dt += timedelta(seconds=time)
         dt -= timedelta(seconds=record_time/2)
         new_times.append(dt.strftime(format_str))
+    print(new_times)
     return new_times
 
 def vrad_2_vdr(pulse_times, vrad_file, out_dir, data_amount, srcdir=srcdir):
@@ -160,7 +187,7 @@ def vdr_2_cs(vdr_file, out_dir, freq_band, source_name, freq, bw,
     else:
         subprocess.run(cmd, shell=True)
 
-def calculate_offsets(mjd_start, times_after_start, bin_widths, cs_files, out_dir, freq_band, freq_low, freq_high, dm):
+def calculate_offsets(mjd_start, times_after_start, bin_widths, snrs, cs_files, out_dir, freq_band, freq_low, freq_high, dm):
     """
     Calculates offset time for each burst.
     Writes offset to txt file for burst plotting
@@ -200,19 +227,20 @@ def calculate_offsets(mjd_start, times_after_start, bin_widths, cs_files, out_di
 
             t_dm = DM_CONSTANT * (freq_low**(-2)-freq_high**(-2)) * dm
 
-            # subtract from offset
+            # subtract from offset, convert to seconds
             off_set -= t_dm/1000
 
         offsets[index] = off_set
     offsets = pd.Series(offsets, name="Offset Times")
     df = offsets.to_frame()
     df['Bin Width'] = bin_widths
+    df['SNR'] = snrs
     df.to_csv('%soffset_times.txt' % out_dir)
     return offsets
 
 @click.command()
 @click.option("--inf_file", type=str, 
-              help="Full path of .inf file", required=True)
+              help="Full path of .inf file. ***You can also input a scan table", required=True)
 @click.option("--sp_file", type=str, 
               help="Full path of single pulse file", required=True)
 @click.option("--vrad_dir", type=str,
@@ -267,7 +295,7 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     # Extract starting time from .inf file
     mjd_start, start_time = extract_start_time(inf_file)
     
-    times_after_start, bin_widths = extract_pulses(sp_file)
+    times_after_start, bin_widths, snrs = extract_pulses(sp_file)
 
 
     # Add list of times to start time
@@ -341,11 +369,12 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
         cs_infiles = subset
     print(cs_infiles)
 
-    freq_low = freq_dct["s"]
+    # add half bw to center freq
+    freq_low = freq_dct["s"] + 0.5 * bw_dct["s"]
     # take highest frequency x-band
-    freq_high = freq_dct[sorted(list(freq_dct.keys()), reverse=True)[0]]
+    freq_high = freq_dct[sorted(list(freq_dct.keys()), reverse=True)[0]] + 0.5 * bw_dct["x"]
 
-    calculate_offsets(mjd_start, times_after_start, bin_widths, cs_infiles, out_dir, freq_band, freq_low, freq_high, dm)
+    calculate_offsets(mjd_start, times_after_start, bin_widths, snrs, cs_infiles, out_dir, freq_band, freq_low, freq_high, dm)
 
     return 
 
