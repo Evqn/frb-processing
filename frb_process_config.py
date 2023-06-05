@@ -39,8 +39,8 @@ tdur = 0.2
 
 
 # Conversions to run
-vrad_to_cs = True
-cs_to_fil = True
+vrad_to_cs = False
+cs_to_fil = False
 plot_fil = True
 
 # Optimizations to run

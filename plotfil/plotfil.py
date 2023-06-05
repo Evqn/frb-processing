@@ -10,15 +10,17 @@ from datetime import datetime, timedelta
 from astropy.time import Time, TimeDelta
 import sp_spec as sp
 import multiprocessing as mp
+import matplotlib.pyplot as plt
+
 
 def read_data(offset_file):
     """
     Read in offset, SNR
     """
     df = pd.read_csv(offset_file)
-    return df["Offset Times"], df["SNR"]
+    return df["Offset Times"], df["SNR"], df["Bin Width"]
 
-def generate_plots(offsets, snrs, file, png_dir, dm, tavg, tdur):
+def generate_plots(offsets, snrs, bin_widths, file, png_dir, dm, tavg, tdur):
     """
     Creates *.png plots of filterbank files
     Takes in offset times to find where to plot
@@ -37,11 +39,30 @@ def generate_plots(offsets, snrs, file, png_dir, dm, tavg, tdur):
 
     offset = offsets[index]
     snr = snrs[index]
+    bin_width = bin_widths[index]
+
+    pulse_width = bin_width * 1.024 * 10**(-5) ### CONSTANT SUBJECT TO CHANGE
 
     basename = os.path.splitext(filename)[0]
     # plot using sp_spec
-    sp.make_plot('%s' % file, dm, index, snr, tavg=int(tavg), tp=offset, 
-                    tdur=tdur, outbins=1024, outfile="%s%s.png" % (png_dir, basename))
+    freqs, spec = sp.make_plot('%s' % file, dm, index, snr, tavg=int(tavg), tp=offset, 
+                    tdur=tdur, outbins=1024, outfile="%s%s.png" % (png_dir, basename), pulse_width=pulse_width)
+    
+    freq_filename = "%s%s_freq.png" % (png_dir, basename)
+    generate_freq_plot(freq_filename, freqs, spec)
+
+def generate_freq_plot(filename, freqs, spec):
+    """
+    Constructs frequency plot centered on pulse
+    """
+    plt.figure(figsize=(10,6))
+    plt.plot(freqs, spec)
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Spectrum')
+    plt.title('Frequency vs Spectrum')
+    plt.savefig(filename)
+    plt.close()
+    
 
 def get_2D_data(offsets, fil_file, npy_dir, dm, tavg, tdur):
     """
@@ -59,7 +80,7 @@ def get_2D_data(offsets, fil_file, npy_dir, dm, tavg, tdur):
         print("Pattern not found in filename.")
 
     offset = offsets[index]
-    _, _, dout = sp.get_snippet_data(fil_file, dm, favg=0, tavg=0, bpass=True,
+    _, _, dout, _ = sp.get_snippet_data(fil_file, dm, favg=0, tavg=0, bpass=True,
                      tp=offset, tdur=tdur)
     np.save(f'{npy_dir}{basename}.npy', dout)
     
@@ -89,7 +110,7 @@ def plotfil(off_file, fil_dir, png_dir, npy_dir, freq_band, dm, tavg, tdur):
 
     Takes in filterbank directory and plots burst given an offset value for each file.
     """
-    offsets, snrs = read_data(off_file)
+    offsets, snrs, bin_widths = read_data(off_file)
     fil_files = glob.glob('%s/%s*fil' % (fil_dir, freq_band))
 
     with mp.Pool() as pool:
@@ -98,7 +119,7 @@ def plotfil(off_file, fil_dir, png_dir, npy_dir, freq_band, dm, tavg, tdur):
 
 
     with mp.Pool() as pool:
-        args_list = [(offsets, snrs, file, png_dir, dm, tavg, tdur) for file in fil_files]
+        args_list = [(offsets, snrs, bin_widths, file, png_dir, dm, tavg, tdur) for file in fil_files]
         pool.starmap(generate_plots, args_list)
 
 

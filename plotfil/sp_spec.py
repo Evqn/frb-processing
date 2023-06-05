@@ -149,6 +149,7 @@ def get_chan_info(data_file):
     foff = yr.your_header.foff
     fch1 = yr.your_header.fch1
     dt   = yr.your_header.tsamp
+    print(f"dt:{dt}")
     nchans = yr.your_header.nchans
     return nchans, fch1, foff, dt
 
@@ -164,6 +165,7 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     nsamps = yr.your_header.nspectra
     freqs = np.arange(nchans) * foff + fch1
     tt = np.arange(nsamps) * dt
+    print(len(tt))
     tt -= np.mean(tt)
     
     # Get data
@@ -200,13 +202,13 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     else:
         ff_out = freqs
 
-    return tt_out, ff_out, dout
+    return tt_out, ff_out, dout, dt
 
 
 def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,  
               outbins=128, tp=None, tdur=None, 
               outfile=None, cnum=None,
-              ctime=None, cdm=None, cwidth=None):
+              ctime=None, cdm=None, cwidth=None, pulse_width=None):
     """
     make 3 panel plot
     """
@@ -214,7 +216,7 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
         plt.ioff()
     else: pass 
 
-    tt, freqs, dat = get_snippet_data(filfile, dm, 
+    tt, freqs, dat, dt = get_snippet_data(filfile, dm, 
                              favg=favg, tavg=tavg, bpass=True,
                              tp=tp, tdur=tdur)
     tt *= 1e3
@@ -262,8 +264,6 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
     #ts0 = np.mean(dat0, axis=1)
     #ts0 = (ts0-avg)/sig
     #ax_t.plot(tt0, ts0, c='0.5', zorder=-1)
-    print(np.max(ts))
-    print(np.std(ts[:np.argmax(ts)-100]))
     ax_t.plot(tt, ts)
     ax_t.tick_params(axis='x', labelbottom=False)
     tylim = ax_t.get_ylim()
@@ -275,8 +275,18 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
     #xx_below = np.where( ts <= 0.1*np.max(ts) )[0]
     #xx_lo = np.max(xx_below[xx_below <= xpk ])
     #xx_hi = np.min(xx_below[xx_below >= xpk ])
+
     xx_lo = int( len(ts) // 2 ) - 2
     xx_hi = int( len(ts) // 2 ) + 2
+
+    if pulse_width:
+        sample_width = pulse_width/dt/tavg
+        print(f"Sample Width: {sample_width}")
+        xx_lo = int( len(ts) // 2 ) - int(sample_width//2)
+        xx_hi = int( len(ts) // 2 ) + int(sample_width//2)
+
+        print(f"Low: {xx_lo}")
+        print(f"High: {xx_hi}")
     
     off_spec = np.mean(dat[:Nthird], axis=0)
     off_sig = np.std(off_spec)
@@ -309,7 +319,7 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
                 transform=ax_txt.transAxes)
     
     # Add pulse num and snr text
-    fig.text(0.75, 0.95, f'Pulse: {pulse_num}\nSNR: {snr}', fontsize=12, ha='left', va='top')
+    fig.text(0.75, 0.95, f'Pulse: {pulse_num} \nSNR: {snr}', fontsize=12, ha='left', va='top')
 
     if outfile is not None:
         plt.savefig(outfile, dpi=100, bbox_inches='tight')
@@ -317,6 +327,6 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
     else: 
         plt.show()
 
-    return
+    return freqs, spec
 
 

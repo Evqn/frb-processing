@@ -1,5 +1,5 @@
 # import frb_process_config as par
-import frb_process_config_23m041 as par
+import frb_process_config as par
 import subprocess
 import time
 from tabulate import tabulate

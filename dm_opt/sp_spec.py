@@ -262,14 +262,12 @@ def make_plot(filfile, dm, favg=1, tavg=1, spec_sig=5,
     #ts0 = np.mean(dat0, axis=1)
     #ts0 = (ts0-avg)/sig
     #ax_t.plot(tt0, ts0, c='0.5', zorder=-1)
-    print(np.max(ts))
-    print(np.std(ts[:np.argmax(ts)-100]))
     ax_t.plot(tt, ts)
     ax_t.tick_params(axis='x', labelbottom=False)
     tylim = ax_t.get_ylim()
     #ax_t.set_xlim(tt[0], tt[-1])
     ax_t.set_xlim(tlim)
-
+    print(len(ts))
     # Spectrum
     xpk = np.argmax(ts)
     #xx_below = np.where( ts <= 0.1*np.max(ts) )[0]
@@ -291,7 +289,6 @@ def make_plot(filfile, dm, favg=1, tavg=1, spec_sig=5,
     tlo = tt[xx_lo]
     thi = tt[xx_hi]
     ax_t.fill_betweenx([-10, 100], tlo, thi, color='r', alpha=0.1)
-    print(tlo, thi)
     ax_t.set_ylim(tylim)
 
     # Add cand info subplot
