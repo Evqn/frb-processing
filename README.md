@@ -54,6 +54,19 @@ indirectory/
 
 ### Setting Configuration
 
+3. Outdirectory: Use the following outdirectory structure. The names of the subdirectory are recommended but not required. They can be changed in the configuration file. The subdirectories are named after the files that will be stored in them. 
+
+```
+outdirectory/
+├── cs/
+├── dada/
+├── dm/
+├── fil/
+├── npy/
+├── png/
+└── vdr/
+```
+
 ### Usage
 Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
 
