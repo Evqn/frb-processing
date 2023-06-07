@@ -21,7 +21,7 @@ The project pipeline consists of four main stages:
 
 ## Setup and Usage
 
-This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. 
+1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. 
 ```bash
 .
 ├── frb_process.py
@@ -33,6 +33,7 @@ This project has a modular structure with a master script (frb_process) and seve
 │   └── plotfil.py
 └── dmopt/
     └── dmopt.py
+ ```
 
 To use the project, run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
 
