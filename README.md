@@ -35,7 +35,7 @@ The project pipeline consists of four main stages:
     └── dmopt.py
  ```
  
- 2. Place the \*.vrad files in their 
+ 2. Place the \*.vrad files in any indirectory. The .vrad files are assumed to be in the format `
 
 Finally, to run the python, run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
 
