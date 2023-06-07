@@ -92,7 +92,7 @@ Configure the following settings in `frb_process_config` (Example configuration 
 Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`.
 ## Results
 ![Pulse Plot](pulse.png) 
-Pulse time-series (top), dynamic spectrum (middle), spectrum (right) plot of brightest pulse of J1810-197 magnetar. The vertical redline displays the width of the pulse. 
-![Scintilation Plot](scint.png)
+Pulse time-series (top), dynamic spectrum (middle), spectrum (right) plot of brightest pulse of J1810-197 magnetar. The vertical redline displays the width of the pulse.
+![Scintilation Plot](spectrum.png)
 Spectrum (top) and ACF plot (bottom) centered on pulse. The scintilation bandwidth is at the 1/e point (dashed line). The bandwidth size is shown with a red error bar on the spectrum plot
 
