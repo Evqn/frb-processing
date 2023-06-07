@@ -91,3 +91,5 @@ Configure the following settings in `frb_process_config` (Example configuration 
 ### Usage
 Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`.
 ## Results
+![Pulse Plot](pulse.png) Pulse time-series (top), dynamic spectrum (middle), spectrum (right) plot of brightest pulse of J1810-197 magnetar
+
