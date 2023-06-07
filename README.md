@@ -17,13 +17,15 @@ The project pipeline consists of four main stages:
 
 3. **Plot**: This stage uses the filterbank files to generate detailed plots of the FRBs. The plots present a dynamic spectrum, time-series, and spectrum for each pulse. The pipeline can handle switching between s and x bands and applies time-channel averaging to improve pulse visibility.
 
-4. **Dispersion Measure Optimization**: This stage optimizes the dispersion measure (DM) of the FRBs. By iterating through a range of possible DM values, the optimal DM is identified as the one that maximizes the Signal-to-Noise Ratio (SNR).
+4. **Scintilation Bandwidth**: This stage finds the scintilation bandwidth of every pulse. It also plots the spectrum plot and the ACF of the spectrum only around the exact time frame of the pulse. 
+
+5. **Dispersion Measure Optimization**: This stage optimizes the dispersion measure (DM) of the FRBs. By iterating through a range of possible DM values, the optimal DM is identified as the one that maximizes the Signal-to-Noise Ratio (SNR).
 
 ## Setup and Usage
 
 ### Structural Setup
 
-1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. 
+1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. plotfil and dmopt also have two more dependent files called sp_spec.py
 ```bash
 .
 ├── frb_process.py
@@ -33,8 +35,12 @@ The project pipeline consists of four main stages:
 │   └── cs2fil.py
 ├── plotfil/
 │   └── plotfil.py
-└── dmopt/
-    └── dmopt.py
+│   └── sp_spec.py
+├── dmopt/
+│   └── dmopt.py
+|   └── sp_spec.py
+└── plot_scint/
+    └── plot_scint.py
  ```
  
  2. Indirectory: Put following infiles in any indirectory
@@ -66,24 +72,22 @@ outdirectory/
 ```
 
 ### Setting Configuration
-Configure the following settings in `frb_process_config` Only the important ones are described below. The rest should be self explanatory (Example configuration is given already for 22-295). :
+Configure the following settings in `frb_process_config` (Example configuration is given already for 22-295). :
 ```
 - inf file (inf_file): (basename only)
 - single pulse file (sp_file): (basename only)
 - vrad directory (vrad_dir): (make sure it's located in out directory, basename only, preferably named vrad/)
 - vrad basename (vrad_base): (set to first 5 digits of telescope reading of filename. ex. 22-295)
 - frequency band (freq_band): (either "x" or "s" LOWERCASE)
-- cs basename (cs_base): (MATCH with "x" or "s") depending what you put above
+- basename (cs_base, fil_base, npy_base): (MATCH with "x" or "s" if you want to run on same files) depending what you put above
 - number channels (nchans): This is a LIST. You can specify multiple channels/time resolutions
 - offset file (offset_file): This will contain calculated pulse offset times. It will be put in the outdirectory. Name whatever you want
 - Time average (tavg): How much to average across time series
 - Time duration (tdur): How much of pulse to plot
+- DM info (dm, dm_lo, dm_hi, dm_step): DM and DM optimization parameters. 
 - cleanup (cleanup): this flag will remove vrad and dada intermediate files 
+- flags (vrad_to_cs, cs_to_fil, plot_fil, plot_scint, dm_opt). True or False depending on what stages of the pipeline to run
 ```
-
-There are also flags to determine which steps of the pipeline to run.
-
-
 ### Usage
 Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`.
 ## Results
