@@ -21,6 +21,8 @@ The project pipeline consists of four main stages:
 
 ## Setup and Usage
 
+### Setup
+
 1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. 
 ```bash
 .
@@ -37,7 +39,8 @@ The project pipeline consists of four main stages:
  
  2. Place the \*.vrad files in any indirectory. The .vrad files are assumed to be in the format `
 
-Finally, to run the python, run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
+### Usage
+Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
 
 - Raw *.vrad file locations
 - Output file destinations
