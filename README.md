@@ -2,11 +2,10 @@
 
 ## Introduction
 
-Fast Radio Bursts (FRBs) are brief, bright pulses of radio emission from distant galaxies. They're one of the universe's most perplexing mysteries, offering intriguing opportunities for investigating the intergalactic medium and cosmology. This project is designed to process raw data (in *.vrad files) associated with these FRBs, execute multiple preprocessing steps, and generate detailed plots of bursts and their characteristics. The output data is also prepared for future analysis.
-
+Fast Radio Bursts (FRBs) are brief, bright pulses of radio emission from distant galaxies. They're one of the universe's most perplexing mysteries, offering intriguing opportunities for investigating the intergalactic medium and cosmology. This project is designed to process raw data (in *.vrad files) associated with these FRBs, execute multiple preprocessing steps, generate detailed plots of bursts and their characteristics, and conduct burst analysis.
 ## Objective
 
-The primary goal of this project is to convert raw FRB data into a more interpretable and usable format, allowing for detailed analysis and visualization of FRBs.
+The primary goal of this project is to convert raw FRB data into a more interpretable and usable formatting, allowing it for detailed analysis and visualization of FRBs.
 
 ## Methodology
 
@@ -23,7 +22,8 @@ The project pipeline consists of four main stages:
 ## Setup and Usage
 
 This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. 
-. 
+```bash
+.
 ├── frb_process.py
 ├── vrad2cs/
 │   └── vrad2cs.py
@@ -33,8 +33,6 @@ This project has a modular structure with a master script (frb_process) and seve
 │   └── plotfil.py
 └── dmopt/
     └── dmopt.py
-
-text
 
 To use the project, run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
 
