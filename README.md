@@ -52,8 +52,6 @@ indirectory/
 └── scan.table.23m041 or slcp-0001_DM219.460.inf
 ```
 
-### Setting Configuration
-
 3. Outdirectory: Use the following outdirectory structure. The names of the subdirectory are recommended but not required. They can be changed in the configuration file. The subdirectories are named after the files that will be stored in them. 
 
 ```
@@ -67,16 +65,25 @@ outdirectory/
 └── vdr/
 ```
 
+### Setting Configuration
+Configure the following settings in `frb_process_config` Only the important ones are described below. The rest should be self explanatory (Example configuration is given already for 22-295). :
+```
+- inf file (inf_file): (basename only)
+- single pulse file (sp_file): (basename only)
+- vrad directory (vrad_dir): (make sure it's located in out directory, basename only, preferably named vrad/)
+- vrad basename (vrad_base): (set to first 5 digits of telescope reading of filename. ex. 22-295)
+- frequency band (freq_band): (either "x" or "s" LOWERCASE)
+- cs basename (cs_base): (MATCH with "x" or "s") depending what you put above
+- number channels (nchans): This is a LIST. You can specify multiple channels/time resolutions
+- offset file (offset_file): This will contain calculated pulse offset times. It will be put in the outdirectory. Name whatever you want
+- Time average (tavg): How much to average across time series
+- Time duration (tdur): How much of pulse to plot
+- cleanup (cleanup): this flag will remove vrad and dada intermediate files 
+```
+
+There are also flags to determine which steps of the pipeline to run.
+
+
 ### Usage
-Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
-
-- Raw *.vrad file locations
-- Output file destinations
-- DM value
-- Number of channels
-- Time average
-- S-band or X-band frequency processing
-
-Flags can also be set to determine which processing steps to run.
-
+Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`.
 ## Results
