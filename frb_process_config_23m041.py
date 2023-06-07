@@ -21,25 +21,29 @@ telescope = "robledo"
 data_amount = 3
 
 # Inputs for cs2fil conversion
-cs_base = "x" # set to x or s
+cs_base = "x" # set to x or s if you want same files to be convereted
 cs_dir = "cs/"
 dada_dir = "dada/"
 fil_dir = "fil/"
 dm = 178.85
-nchans = [8]
+nchans = [100]
 
 # inputs for plotfil
 offset_file = "offset_times.txt"
+fil_base = "x" # set to x or s if you want same files to be converted
 png_dir = "png/"
 npy_dir = "npy/"
 tavg = 100
 tdur = 0.2
 
+# scintilation inputs
+npy_base = "x"
 
 # Conversions to run
-vrad_to_cs = True
-cs_to_fil = True
+vrad_to_cs = False
+cs_to_fil = False
 plot_fil = True
+plot_scint = False
 
 # Optimizations to run
 dm_opt = False

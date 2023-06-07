@@ -183,6 +183,7 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     # Dedisperse
     dout = dedisperse_dspec(dat.T, dm, freqs, freqs[0], dt) 
     dout = dout.T
+    print(f"Dout shape: {dout.shape}")
 
     if bpass:
         Nthird = int( nsamps / 3 )
@@ -319,7 +320,10 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
                 transform=ax_txt.transAxes)
     
     # Add pulse num and snr text
-    fig.text(0.75, 0.95, f'Pulse: {pulse_num} \nSNR: {snr}', fontsize=12, ha='left', va='top')
+    if pulse_width:
+        fig.text(0.75, 0.95, f'Pulse: {pulse_num} \nSNR: {snr} \nPulse Width (ms): {np.round(pulse_width*1000, 3)}', fontsize=12, ha='left', va='top')
+    else:
+        fig.text(0.75, 0.95, f'Pulse: {pulse_num} \nSNR: {snr}', fontsize=12, ha='left', va='top')
 
     if outfile is not None:
         plt.savefig(outfile, dpi=100, bbox_inches='tight')

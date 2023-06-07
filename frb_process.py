@@ -1,5 +1,5 @@
 # import frb_process_config as par
-import frb_process_config as par
+import frb_process_config_23m041 as par
 import subprocess
 import time
 from tabulate import tabulate
@@ -59,11 +59,11 @@ def plot_fil():
     print("---------------------------------------------")
     print("Converting from fil to plot")
     print("---------------------------------------------")
-    params = {"out": par.outdir, "offset": par.offset_file, "freq_band": par.freq_band,
+    params = {"out": par.outdir, "offset": par.offset_file, "fil_base": par.fil_base,
         "fil_dir": par.fil_dir, "png_dir": par.png_dir, "npy_dir": par.npy_dir, "dm": par.dm, "tavg": par.tavg, "tdur": par.tdur}
     
-    cmd = "python3 -u plotfil/plotfil.py --off_file %(out)s%(offset)s --fil_dir %(out)s%(fil_dir)s \
-            --png_dir %(out)s%(png_dir)s --npy_dir %(out)s%(npy_dir)s --freq_band %(freq_band)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
+    cmd = "python3 -u plotfil/plotfil.py --off_file %(out)s%(offset)s --fil_dir %(out)s%(fil_dir)s --fil_base %(fil_base)s \
+            --png_dir %(out)s%(png_dir)s --npy_dir %(out)s%(npy_dir)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
     print(cmd)
     subprocess.run(cmd, shell=True)
 
@@ -79,6 +79,22 @@ def dm_opt():
     
     cmd = "python3 -u dm_opt/dm_opt.py --out_dir %(out_dir)s --dm_dir %(dm_dir)s --fil_dir %(fil_dir)s --offsets %(offset)s --dm_lo %(dm_lo)f \
             --dm_hi %(dm_hi)f --dm_step %(dm_step)f" % params
+    print(cmd)
+    subprocess.run(cmd, shell=True)
+
+def plot_scint():
+    """
+    Plots scintilation bandwidth
+    """
+    print("---------------------------------------------")
+    print("Plotting Scintilation Bandwidth")
+    print("---------------------------------------------")
+    params = {
+        "out_dir": par.outdir, "npy_dir": par.npy_dir, "png_dir": par.png_dir, "npy_base": par.npy_base, "freq_band": par.freq_band, 
+    }
+
+    cmd = "python3 -u plot_scint/plot_scint.py --out_dir %(out_dir)s --npy_dir %(npy_dir)s --png_dir %(png_dir)s --npy_base %(npy_base)s \
+            --freq_band %(freq_band)s" % params
     print(cmd)
     subprocess.run(cmd, shell=True)
 
@@ -101,6 +117,10 @@ if __name__ == "__main__":
             st = time.time()
             plot_fil()
             times.append(["fil->plot", round(time.time()-st, 2)])
+        if par.plot_scint:
+            st = time.time()
+            plot_scint()
+            times.append(["scintilation plot", round(time.time()-st, 2)])
         if par.dm_opt:
             st = time.time()
             dm_opt()

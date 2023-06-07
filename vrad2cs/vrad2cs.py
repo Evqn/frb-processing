@@ -304,7 +304,11 @@ def vrad_2_cs(inf_file, sp_file, vrad_dir, vrad_base, out_dir,
     
     # Take each vrad file and convert to vdr
     print("\n\nvrad -> vdr...")
-    vrad_infiles = glob.glob("%s/%s*.vrad" % (vrad_dir, vrad_base))
+    if freq_band == "s":
+        vrad_infiles = glob.glob("%s/%s*SLCP.vrad" % (vrad_dir, vrad_base)) + glob.glob("%s/%s*SRCP.vrad" % (vrad_dir, vrad_base))
+    else:
+        vrad_infiles = glob.glob("%s/%s*XLCP.vrad" % (vrad_dir, vrad_base)) + glob.glob("%s/%s*XRCP.vrad" % (vrad_dir, vrad_base))
+
     print(vrad_infiles)
 
     with mp.Pool() as pool:
