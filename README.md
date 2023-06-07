@@ -22,6 +22,20 @@ The project pipeline consists of four main stages:
 
 ## Setup and Usage
 
+This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. 
+. 
+├── frb_process.py
+├── vrad2cs/
+│   └── vrad2cs.py
+├── cs2fil/
+│   └── cs2fil.py
+├── plotfil/
+│   └── plotfil.py
+└── dmopt/
+    └── dmopt.py
+
+text
+
 To use the project, run `python3 frb_process.py`. Modify `frb_process_config` to change settings, including:
 
 - Raw *.vrad file locations
