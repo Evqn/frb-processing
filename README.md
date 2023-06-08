@@ -25,7 +25,7 @@ The project pipeline consists of four main stages:
 
 ### Structural Setup
 
-1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. In of the stages described above has a separate script located in its corresponding subdirectory. plotfil and dmopt also have two more dependent files called sp_spec.py
+1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. Each of the stages described above has a separate script located in its corresponding subdirectory. plotfil and dmopt also have two more dependent files called sp_spec.py
 ```bash
 .
 ├── frb_process.py
