@@ -44,7 +44,7 @@ The project pipeline consists of four main stages:
  ```
  
  2. Indirectory: Put following infiles in any indirectory
-    - \*vrad files: These are stored in a subfolder in the indirectory preferebaly with the name (/vrad). These are the raw telescope readings. The .vrad files are assumed to be in the format Ex. `22-295-001_d63_PSR2_SLCP.vrad` The key here is making sure there is a -ddd (three digits) along with SLCP/SRCP/XLCP/XRCP in the file name. 
+    - \*vrad files: These are stored in a subfolder in the indirectory preferably with the name (/vrad). These are the raw telescope readings. The .vrad files are assumed to be in the format Ex. `22-295-001_d63_PSR2_SLCP.vrad` The key here is making sure there is a -ddd (three digits) along with SLCP/SRCP/XLCP/XRCP in the file name. 
     - Singlepulse file: This is a .txt file specifying pulse readings from observation. Assumed to be in the format `*.singlepulse`. Ex. `srcp-0001_DM178.850.singlepulse`
     - Scan table/.inf file: This is a info .txt file specifying the telescope reading info. You can put either a file with `scan.table` in its name or in the format `*.inf`. Ex. `scan.table.23m041` or `slcp-0001_DM219.460.inf`
 
