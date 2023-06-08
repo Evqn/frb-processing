@@ -52,7 +52,7 @@ The project pipeline consists of four main stages:
 indirectory/
 ├── vrad/
 │   ├── 22-295-001_d63_PSR2_SLCP.vrad
-│   ├── anotherfile_dxx_PSR2_XRCP.vrad
+│   ├── anotherfile-ddd_d63_PSR2_XRCP.vrad
 │   └── ...
 ├── srcp-0001_DM178.850.singlepulse
 └── scan.table.23m041 or slcp-0001_DM219.460.inf
