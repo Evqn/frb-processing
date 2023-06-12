@@ -105,3 +105,6 @@ Pulse time-series (top), dynamic spectrum (middle), spectrum (right) plot of bri
 
 Spectrum (top) and ACF plot (bottom) centered on pulse. The scintilation bandwidth is at the 1/e point (dashed line). The bandwidth size is shown with a red error bar on the spectrum plot
 
+![Bandpass Plot](bandpass.png)
+
+Bandpass plot of pulse. Flagged channels are indicated. 
