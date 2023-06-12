@@ -9,7 +9,7 @@ The primary goal of this project is to convert raw FRB data into a more interpre
 
 ## Methodology
 
-The project pipeline consists of four main stages:
+The project pipeline consists of five main stages:
 
 1. **Vrad to CS**: The project inputs are scan_table (containing start time of observation) and a singlepulse file (containing all the pulses and the offsets from the start observation). Each pulse in the singlepulse file is processed to calculate the observation time and converted into *.cs file format (after passing through an intermediate *.vdr format). The pipeline also manages differences in x-band and s-band files, grouping and assigning frequencies as required.
 
