@@ -30,6 +30,14 @@ fil_dir = "fil/"
 dm = 219.46
 nchans = [100]
 
+# Inputs for combine_pol
+lcp_base = "slcp"
+rcp_base = "srcp"
+comb_base = "sbnd"
+ez = 0.15 # edge zap
+dthresh = 0.25 # Fractional diff threshold
+nwin = 5 # window size
+
 # inputs for plotfil
 offset_file = "offset_times.txt"
 fil_base = "s" # set to x or s if you want same files to be converted
@@ -46,6 +54,7 @@ vrad_to_cs = True
 cs_to_fil = True
 plot_fil = True
 plot_scint = True
+combine_fil = True
 
 # Optimizations to run
 dm_opt = False

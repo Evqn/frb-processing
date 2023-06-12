@@ -52,6 +52,25 @@ def cs_2_fil():
         print(cmd)
         subprocess.run(cmd, shell=True)
 
+def combine_fil():
+    """
+    Combines lcp and rcp files
+    """
+    print("---------------------------------------------")
+    print("Combining polarizations")
+    print("---------------------------------------------")
+    # Go through each channel number
+    params = {"out": par.outdir, "lcp_base": par.lcp_base, "rcp_base": par.rcp_base, 
+              "comb_base": par.comb_base, "fil_dir": par.fil_dir, "png_dir": par.png_dir, "ez": par.ez, "dthresh": par.dthresh,
+              "nwin": par.nwin}
+    
+    cmd = "python3 -u combine_pol/combine_pol.py --lcp_base %(lcp_base)s \
+            --rcp_base %(rcp_base)s --comb_base %(comb_base)s --fil_dir %(out)s%(fil_dir)s \
+            --png_dir %(out)s%(png_dir)s --edgezap %(ez)f --dthresh %(dthresh)f --chanwin %(nwin)i " % params
+        
+    print(cmd)
+    subprocess.run(cmd, shell=True)
+
 def plot_fil():
     """
     Plots filterbank files
@@ -113,6 +132,10 @@ if __name__ == "__main__":
             st = time.time()
             cs_2_fil()
             times.append(["cs->fil", round(time.time()-st, 2)])
+        if par.combine_fil:
+            st = time.time()
+            combine_fil()
+            times.append(["Combine polarizations", round(time.time()-st, 2)])
         if par.plot_fil:
             st = time.time()
             plot_fil()
