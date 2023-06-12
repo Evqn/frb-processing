@@ -20,7 +20,7 @@ def read_data(offset_file):
     df = pd.read_csv(offset_file)
     return df["Offset Times"], df["SNR"], df["Bin Width"]
 
-def generate_plots(offsets, snrs, bin_widths, file, png_dir, dm, tavg, tdur):
+def generate_plots(offsets, snrs, bin_widths, file, comb_base, png_dir, dm, tavg, tdur):
     """
     Creates *.png plots of filterbank files
     Takes in offset times to find where to plot
@@ -45,8 +45,15 @@ def generate_plots(offsets, snrs, bin_widths, file, png_dir, dm, tavg, tdur):
 
     basename = os.path.splitext(filename)[0]
     # plot using sp_spec
+
+    # no need to bandpass
+    bpass = True
+    if comb_base in basename:
+        bpass = False
+        
+
     freqs, spec = sp.make_plot('%s' % file, dm, index, snr, tavg=int(tavg), tp=offset, 
-                    tdur=tdur, outbins=1024, outfile="%s%s.png" % (png_dir, basename), pulse_width=pulse_width)
+                    tdur=tdur, outbins=1024, outfile="%s%s.png" % (png_dir, basename), pulse_width=pulse_width, bpass=bpass)
     
     # freq_filename = "%s%s_freq.png" % (png_dir, basename)
     # generate_freq_plot(freq_filename, freqs, spec)
@@ -64,7 +71,7 @@ def generate_freq_plot(filename, freqs, spec):
     plt.close()
     
 
-def get_2D_data(offsets, bin_widths, fil_file, npy_dir, dm, tavg, tdur, bin_dir = 1.024*10**(-5)):
+def get_2D_data(offsets, bin_widths, fil_file, comb_base, npy_dir, dm, tavg, tdur, bin_dir = 1.024*10**(-5)):
     """
     Returns dedispered data before averaging around time and freq channels.
     """
@@ -81,8 +88,12 @@ def get_2D_data(offsets, bin_widths, fil_file, npy_dir, dm, tavg, tdur, bin_dir 
 
     offset = offsets[index]
     tdur = bin_widths[index] * bin_dir
-    print(tdur)
-    _, _, dout, _ = sp.get_snippet_data(fil_file, dm, favg=0, tavg=0, bpass=True,
+
+    bpass = True
+    if comb_base in basename:
+        bpass = False
+        
+    _, _, dout, _ = sp.get_snippet_data(fil_file, dm, favg=0, tavg=0, bpass=bpass,
                      tp=offset, tdur=tdur)
     np.save(f'{npy_dir}{basename}.npy', dout)
     
@@ -96,6 +107,8 @@ def get_2D_data(offsets, bin_widths, fil_file, npy_dir, dm, tavg, tdur, bin_dir 
               help="Dir of *fil files", required=True)
 @click.option("--fil_base", type=str,
               help="basename of *fil files", required=True)
+@click.option("--comb_base", type=str,
+              help="Combined filterbank basename", required=True)
 @click.option("--png_dir", type=str, 
               help="Dir of *png file", required=True)
 @click.option("--npy_dir", type=str,
@@ -106,7 +119,7 @@ def get_2D_data(offsets, bin_widths, fil_file, npy_dir, dm, tavg, tdur, bin_dir 
               help="Average time", required=True)
 @click.option("--tdur", type=float, 
               help="Duration of pulse", required=True)
-def plotfil(off_file, fil_dir, fil_base, png_dir, npy_dir, dm, tavg, tdur):
+def plotfil(off_file, fil_dir, fil_base, comb_base, png_dir, npy_dir, dm, tavg, tdur):
     """
     Creates plot of filterbank files.
 
@@ -116,12 +129,12 @@ def plotfil(off_file, fil_dir, fil_base, png_dir, npy_dir, dm, tavg, tdur):
     fil_files = glob.glob('%s/%s*fil' % (fil_dir, fil_base))
 
     with mp.Pool() as pool:
-        args_list = [(offsets, bin_widths, fil_file, npy_dir, dm, tavg, tdur) for fil_file in fil_files]
+        args_list = [(offsets, bin_widths, fil_file, comb_base, npy_dir, dm, tavg, tdur) for fil_file in fil_files]
         pool.starmap(get_2D_data, args_list)
 
 
     with mp.Pool() as pool:
-        args_list = [(offsets, snrs, bin_widths, file, png_dir, dm, tavg, tdur) for file in fil_files]
+        args_list = [(offsets, snrs, bin_widths, file, comb_base, png_dir, dm, tavg, tdur) for file in fil_files]
         pool.starmap(generate_plots, args_list)
 
 

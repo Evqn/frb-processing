@@ -149,7 +149,6 @@ def get_chan_info(data_file):
     foff = yr.your_header.foff
     fch1 = yr.your_header.fch1
     dt   = yr.your_header.tsamp
-    print(f"dt:{dt}")
     nchans = yr.your_header.nchans
     return nchans, fch1, foff, dt
 
@@ -165,7 +164,6 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     nsamps = yr.your_header.nspectra
     freqs = np.arange(nchans) * foff + fch1
     tt = np.arange(nsamps) * dt
-    print(len(tt))
     tt -= np.mean(tt)
     
     # Get data
@@ -183,11 +181,12 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     # Dedisperse
     dout = dedisperse_dspec(dat.T, dm, freqs, freqs[0], dt) 
     dout = dout.T
-    print(f"Dout shape: {dout.shape}")
-
     if bpass:
         Nthird = int( nsamps / 3 )
         bp = np.mean(dout[:Nthird], axis=0)
+        xx = np.where(bp==0)[0]
+        if len(xx):
+            bp[xx] = 1
         dout = dout/bp - 1
     else: pass
 
@@ -206,10 +205,10 @@ def get_snippet_data(filfile, dm, favg=1, tavg=1, bpass=True,
     return tt_out, ff_out, dout, dt
 
 
-def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,  
+def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
               outbins=128, tp=None, tdur=None, 
               outfile=None, cnum=None,
-              ctime=None, cdm=None, cwidth=None, pulse_width=None):
+              ctime=None, cdm=None, cwidth=None, pulse_width=None, bpass=True):
     """
     make 3 panel plot
     """
@@ -218,7 +217,7 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
     else: pass 
 
     tt, freqs, dat, dt = get_snippet_data(filfile, dm, 
-                             favg=favg, tavg=tavg, bpass=True,
+                             favg=favg, tavg=tavg, bpass=bpass,
                              tp=tp, tdur=tdur)
     tt *= 1e3
     #tt0, _, dat0 = get_snippet_data(filfile, 0, 
@@ -282,12 +281,8 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
 
     if pulse_width:
         sample_width = pulse_width/dt/tavg
-        print(f"Sample Width: {sample_width}")
         xx_lo = int( len(ts) // 2 ) - int(sample_width//2)
         xx_hi = int( len(ts) // 2 ) + int(sample_width//2)
-
-        print(f"Low: {xx_lo}")
-        print(f"High: {xx_hi}")
     
     off_spec = np.mean(dat[:Nthird], axis=0)
     off_sig = np.std(off_spec)
@@ -302,7 +297,6 @@ def make_plot(filfile, dm, pulse_num, snr, favg=1, tavg=1, spec_sig=5,
     tlo = tt[xx_lo]
     thi = tt[xx_hi]
     ax_t.fill_betweenx([-10, 100], tlo, thi, color='r', alpha=0.1)
-    print(tlo, thi)
     ax_t.set_ylim(tylim)
 
     # Add cand info subplot

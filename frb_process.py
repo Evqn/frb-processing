@@ -52,7 +52,7 @@ def cs_2_fil():
         print(cmd)
         subprocess.run(cmd, shell=True)
 
-def combine_fil():
+def combine_pol():
     """
     Combines lcp and rcp files
     """
@@ -79,10 +79,10 @@ def plot_fil():
     print("Converting from fil to plot")
     print("---------------------------------------------")
     params = {"out": par.outdir, "offset": par.offset_file, "fil_base": par.fil_base,
-        "fil_dir": par.fil_dir, "png_dir": par.png_dir, "npy_dir": par.npy_dir, "dm": par.dm, "tavg": par.tavg, "tdur": par.tdur}
+        "fil_dir": par.fil_dir, "png_dir": par.png_dir, "npy_dir": par.npy_dir, "dm": par.dm, "tavg": par.tavg, "tdur": par.tdur, "comb_base":par.comb_base}
     
     cmd = "python3 -u plotfil/plotfil.py --off_file %(out)s%(offset)s --fil_dir %(out)s%(fil_dir)s --fil_base %(fil_base)s \
-            --png_dir %(out)s%(png_dir)s --npy_dir %(out)s%(npy_dir)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
+            --comb_base %(comb_base)s --png_dir %(out)s%(png_dir)s --npy_dir %(out)s%(npy_dir)s --dm %(dm)f --tavg %(tavg)f --tdur %(tdur)f" % params
     print(cmd)
     subprocess.run(cmd, shell=True)
 
@@ -132,9 +132,9 @@ if __name__ == "__main__":
             st = time.time()
             cs_2_fil()
             times.append(["cs->fil", round(time.time()-st, 2)])
-        if par.combine_fil:
+        if par.combine_pol:
             st = time.time()
-            combine_fil()
+            combine_pol()
             times.append(["Combine polarizations", round(time.time()-st, 2)])
         if par.plot_fil:
             st = time.time()

@@ -52,7 +52,7 @@ vrad_to_cs = False
 cs_to_fil = False
 plot_fil = True
 plot_scint = False
-combine_fil = True
+combine_pol = False
 
 # Optimizations to run
 dm_opt = False

@@ -54,7 +54,7 @@ vrad_to_cs = True
 cs_to_fil = True
 plot_fil = True
 plot_scint = True
-combine_fil = True
+combine_pol = True
 
 # Optimizations to run
 dm_opt = False
