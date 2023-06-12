@@ -9,23 +9,25 @@ The primary goal of this project is to convert raw FRB data into a more interpre
 
 ## Methodology
 
-The project pipeline consists of five main stages:
+The project pipeline consists of six stages:
 
 1. **Vrad to CS**: The project inputs are scan_table (containing start time of observation) and a singlepulse file (containing all the pulses and the offsets from the start observation). Each pulse in the singlepulse file is processed to calculate the observation time and converted into *.cs file format (after passing through an intermediate *.vdr format). The pipeline also manages differences in x-band and s-band files, grouping and assigning frequencies as required.
 
 2. **CS to Filterbank**: The *.cs files are converted into filterbank files, which are more suitable for analysis. For x-band files, aggregation occurs at this stage. The number of channels can be set here, defining the time series for the data.
 
-3. **Plot**: This stage uses the filterbank files to generate detailed plots of the FRBs. The plots present a dynamic spectrum, time-series, and spectrum for each pulse. The pipeline can handle switching between s and x bands and applies time-channel averaging to improve pulse visibility.
+3. **Combined Polarization**: This stage combines the left circular polarization (LCP) and right circular polarization (RCP) files. Along with that, bandpass correction and RFI zap are run. 
 
-4. **Scintilation Bandwidth**: This stage finds the scintilation bandwidth of every pulse. It also plots the spectrum plot and the ACF of the spectrum only around the exact time frame of the pulse. 
+4. **Plot**: This stage uses the filterbank files to generate detailed plots of the FRBs. The plots present a dynamic spectrum, time-series, and spectrum for each pulse. The pipeline can handle switching between s and x bands and applies time-channel averaging to improve pulse visibility.
 
-5. **Dispersion Measure Optimization**: This stage optimizes the dispersion measure (DM) of the FRBs. By iterating through a range of possible DM values, the optimal DM is identified as the one that maximizes the Signal-to-Noise Ratio (SNR).
+5. **Scintilation Bandwidth**: This stage finds the scintilation bandwidth of every pulse. It also plots the spectrum plot and the ACF of the spectrum only around the exact time frame of the pulse. 
+
+6. **Dispersion Measure Optimization**: This stage optimizes the dispersion measure (DM) of the FRBs. By iterating through a range of possible DM values, the optimal DM is identified as the one that maximizes the Signal-to-Noise Ratio (SNR).
 
 ## Setup and Usage
 
 ### Structural Setup
 
-1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. Each of the stages described above has a separate script located in its corresponding subdirectory. plotfil and dmopt also have two more dependent files called sp_spec.py
+1. This project has a modular structure with a master script (frb_process) and several subscripts, each housed in their own subdirectory of the same name. Each of the stages described above has a separate script located in its corresponding subdirectory. combined_pol has another dependent file called zap_combine.py. plotfil and dmopt also have two more dependent files called sp_spec.py
 ```bash
 .
 ├── frb_process.py
@@ -33,6 +35,9 @@ The project pipeline consists of five main stages:
 │   └── vrad2cs.py
 ├── cs2fil/
 │   └── cs2fil.py
+├── combined_pol/
+│   └── combined_pol.py
+│   └── zap_combine.py
 ├── plotfil/
 │   └── plotfil.py
 │   └── sp_spec.py
@@ -85,8 +90,9 @@ Configure the following settings in `frb_process_config` (Example configuration 
 - Time average (tavg): How much to average across time series
 - Time duration (tdur): How much of pulse to plot
 - DM info (dm, dm_lo, dm_hi, dm_step): DM and DM optimization parameters. 
+- Combined polarization info (ez, dthresh, nwin): Combined polarization parameters (edge zap, fractional difference threshold, number of windows)
 - cleanup (cleanup): this flag will remove vrad and dada intermediate files 
-- flags (vrad_to_cs, cs_to_fil, plot_fil, plot_scint, dm_opt). True or False depending on what stages of the pipeline to run
+- flags (vrad_to_cs, cs_to_fil, plot_fil, plot_scint, dm_opt, combine_pol). True or False depending on what stages of the pipeline to run
 ```
 ### Usage
 Before running, ensure you are in the `Singularity` environment. Run `python3 frb_process.py`.
