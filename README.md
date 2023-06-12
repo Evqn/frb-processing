@@ -38,7 +38,7 @@ The project pipeline consists of five main stages:
 │   └── sp_spec.py
 ├── dmopt/
 │   └── dmopt.py
-|   └── sp_spec.py
+│   └── sp_spec.py
 └── plot_scint/
     └── plot_scint.py
  ```
