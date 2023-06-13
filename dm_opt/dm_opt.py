@@ -41,8 +41,11 @@ def calc_snr(fil_file, dm, pulse_bins, tp, tdur, bin_width = 1.024*10**(-5), sam
     """
     # number of bins to avg over
     tavg = ((pulse_bins * bin_width) / n_bins) / sample_time
+    bpass = True
+    if "bnd" in fil_file:
+        bpass = False
     tt, freqs, dat = sp.get_snippet_data(fil_file, dm, 
-                             favg=0, tavg=int(tavg), bpass=True,
+                             favg=0, tavg=int(tavg), bpass=bpass,
                              tp=tp, tdur=tdur)
     
     # get ts from dat

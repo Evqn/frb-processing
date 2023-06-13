@@ -11,7 +11,7 @@ outdir = "/out/23m041/"
 
 # Inputs for vrad2cs conversion
 inf_file = "scan.table.23m041"
-sp_file = "three.singlepulse"
+sp_file = "one.singlepulse"
 vrad_dir = "vrad/"
 vrad_base = "23-041" # first 5 digits identifying telescope reading
 
@@ -26,7 +26,7 @@ cs_dir = "cs/"
 dada_dir = "dada/"
 fil_dir = "fil/"
 dm = 178.85
-nchans = [8, 100] # list
+nchans = [100] # list
 
 # Inputs for combine_pol
 lcp_base = "xlcp"
@@ -48,14 +48,14 @@ tdur = 0.2
 npy_base = "x"
 
 # Conversions to run
-vrad_to_cs = False
-cs_to_fil = False
+vrad_to_cs = True
+cs_to_fil = True
 plot_fil = True
-plot_scint = False
-combine_pol = False
+plot_scint = True
+combine_pol = True
 
 # Optimizations to run
-dm_opt = False
+dm_opt = True
 
 # DM Optimizition
 dm_lo = 0
